@@ -11,24 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-const CEDEARS = [
-  { ticker: "SPY", name: "S&P 500 ETF" },
-  { ticker: "QQQ", name: "Nasdaq 100 ETF" },
-  { ticker: "AAPL", name: "Apple" },
-  { ticker: "MSFT", name: "Microsoft" },
-  { ticker: "GOOGL", name: "Alphabet" },
-  { ticker: "AMZN", name: "Amazon" },
-  { ticker: "TSLA", name: "Tesla" },
-  { ticker: "META", name: "Meta" },
-  { ticker: "NVDA", name: "NVIDIA" },
-  { ticker: "BABA", name: "Alibaba" },
-  { ticker: "PFE", name: "Pfizer" },
-  { ticker: "KO", name: "Coca-Cola" },
-  { ticker: "DIS", name: "Disney" },
-  { ticker: "NU", name: "Nu Holdings" },
-  { ticker: "MELI", name: "MercadoLibre" },
-];
+import { CEDEARS } from "@/lib/cedears";
+import { isValidPositiveNumber } from "@/lib/parse-number";
 
 export type FormValues = {
   ticker: string;
@@ -36,6 +20,7 @@ export type FormValues = {
   purchaseDate: string;
   purchasePrice: string;
   currency: "ARS" | "USD";
+  cclAtBuy: string;
 };
 
 type Props = {
@@ -50,11 +35,22 @@ export default function CalculatorForm({ onSubmit, loading }: Props) {
     purchaseDate: "",
     purchasePrice: "",
     currency: "ARS",
+    cclAtBuy: "",
   });
+
+  const selectedCedear = CEDEARS.find((c) => c.ticker === form.ticker);
+
+  const isFormValid =
+    !!form.ticker &&
+    !!form.quantity &&
+    Number(form.quantity) > 0 &&
+    !!form.purchaseDate &&
+    isValidPositiveNumber(form.purchasePrice) &&
+    (form.currency === "USD" || isValidPositiveNumber(form.cclAtBuy));
 
   function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
-    onSubmit(form);
+    if (isFormValid) onSubmit(form);
   }
 
   return (
@@ -87,6 +83,13 @@ export default function CalculatorForm({ onSubmit, loading }: Props) {
             ))}
           </SelectContent>
         </Select>
+        {selectedCedear && (
+          <p className="text-zinc-600 text-xs">
+            Ratio de conversión:{" "}
+            <span className="text-zinc-500">{selectedCedear.ratio}:1</span>
+            <span className="ml-1">(1 acción = {selectedCedear.ratio} CEDEARs)</span>
+          </p>
+        )}
       </div>
 
       {/* Cantidad + Fecha */}
@@ -124,15 +127,14 @@ export default function CalculatorForm({ onSubmit, loading }: Props) {
       {/* Precio + Moneda */}
       <div className="space-y-1.5">
         <Label className="text-zinc-400 text-xs uppercase tracking-wider">
-          Precio de compra
+          Precio de compra por CEDEAR
         </Label>
         <div className="flex gap-3">
           <Input
             id="purchasePrice"
-            type="number"
-            min="0"
-            step="0.01"
-            placeholder={form.currency === "ARS" ? "15.000,00" : "150,00"}
+            type="text"
+            inputMode="decimal"
+            placeholder={form.currency === "ARS" ? "43.720" : "150,50"}
             value={form.purchasePrice}
             onChange={(e) => setForm({ ...form, purchasePrice: e.target.value })}
             className="bg-zinc-900 border-zinc-800 text-zinc-100 placeholder:text-zinc-600 h-11 flex-1"
@@ -143,7 +145,7 @@ export default function CalculatorForm({ onSubmit, loading }: Props) {
               <button
                 key={cur}
                 type="button"
-                onClick={() => setForm({ ...form, currency: cur })}
+                onClick={() => setForm({ ...form, currency: cur, cclAtBuy: "" })}
                 className={`px-4 text-sm font-semibold transition-colors ${
                   form.currency === cur
                     ? "bg-zinc-100 text-zinc-900"
@@ -157,9 +159,31 @@ export default function CalculatorForm({ onSubmit, loading }: Props) {
         </div>
       </div>
 
+      {/* CCL al momento de compra — solo en ARS */}
+      {form.currency === "ARS" && (
+        <div className="space-y-1.5">
+          <Label htmlFor="cclAtBuy" className="text-zinc-400 text-xs uppercase tracking-wider">
+            CCL al momento de compra
+          </Label>
+          <Input
+            id="cclAtBuy"
+            type="text"
+            inputMode="decimal"
+            placeholder="1.050"
+            value={form.cclAtBuy}
+            onChange={(e) => setForm({ ...form, cclAtBuy: e.target.value })}
+            className="bg-zinc-900 border-zinc-800 text-zinc-100 placeholder:text-zinc-600 h-11"
+          />
+          <p className="text-zinc-600 text-xs">
+            Consultá el CCL histórico en{" "}
+            <span className="text-zinc-500">ambito.com</span> o tu broker.
+          </p>
+        </div>
+      )}
+
       <Button
         type="submit"
-        disabled={!form.ticker || !form.quantity || !form.purchaseDate || !form.purchasePrice || loading}
+        disabled={!isFormValid || loading}
         className="w-full h-11 bg-zinc-100 text-zinc-900 hover:bg-zinc-200 font-semibold disabled:opacity-30"
       >
         {loading ? "Calculando…" : "Calcular rendimiento"}

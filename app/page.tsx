@@ -4,19 +4,40 @@ import { useState } from "react";
 import CalculatorForm, { type FormValues } from "@/components/calculator-form";
 import ResultsPanel, { type Results } from "@/components/results-panel";
 import { Separator } from "@/components/ui/separator";
+import type { CalculateResponse } from "@/app/api/calculate/route";
 
 export default function Home() {
   const [results, setResults] = useState<Results | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
   async function handleSubmit(values: FormValues) {
     setLoading(true);
-    // TODO: call APIs and compute results
-    console.log("Form submitted:", values);
-    // Placeholder — remove when real logic is wired up
-    await new Promise((r) => setTimeout(r, 500));
-    setResults(null);
-    setLoading(false);
+    setError(null);
+    setHasSubmitted(true);
+
+    try {
+      const res = await fetch("/api/calculate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+
+      const data: CalculateResponse = await res.json();
+
+      if ("error" in data) {
+        setError(data.error);
+        setResults(null);
+      } else {
+        setResults(data);
+      }
+    } catch {
+      setError("No se pudo conectar con el servidor. Verificá tu conexión.");
+      setResults(null);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -38,14 +59,24 @@ export default function Home() {
         </div>
 
         {/* Results */}
-        {(results || !loading) && (
+        {hasSubmitted && (
           <>
             <Separator className="my-8 bg-zinc-800" />
             <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-6">
               <h2 className="mb-5 text-xs font-semibold uppercase tracking-wider text-zinc-500">
                 Resultados
               </h2>
-              <ResultsPanel results={results} />
+              {loading ? (
+                <div className="flex items-center justify-center py-10">
+                  <p className="text-sm text-zinc-500">Consultando APIs…</p>
+                </div>
+              ) : error ? (
+                <p className="rounded-md bg-red-950/40 border border-red-900/50 px-4 py-3 text-sm text-red-400">
+                  {error}
+                </p>
+              ) : (
+                <ResultsPanel results={results} />
+              )}
             </div>
           </>
         )}

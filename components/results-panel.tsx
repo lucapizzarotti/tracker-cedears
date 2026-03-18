@@ -4,11 +4,11 @@ import { Separator } from "@/components/ui/separator";
 
 export type Results = {
   yieldUSD: number;
-  yieldARS: number;
-  fxImpact: number;
+  yieldARS: number | null;
+  fxImpact: number | null;
   buyPriceUSD: number;
   currentPriceUSD: number;
-  cclAtBuy: number;
+  cclAtBuy: number | null;
   cclCurrent: number;
 };
 
@@ -50,15 +50,23 @@ export default function ResultsPanel({ results }: Props) {
         </div>
         <div className="space-y-1">
           <p className="text-zinc-500 text-xs uppercase tracking-wider">Rendimiento ARS</p>
-          <p className={`text-2xl font-semibold tabular-nums ${pctColor(results.yieldARS)}`}>
-            {formatPct(results.yieldARS)}
-          </p>
+          {results.yieldARS !== null ? (
+            <p className={`text-2xl font-semibold tabular-nums ${pctColor(results.yieldARS)}`}>
+              {formatPct(results.yieldARS)}
+            </p>
+          ) : (
+            <p className="text-2xl font-semibold text-zinc-600">—</p>
+          )}
         </div>
         <div className="space-y-1">
           <p className="text-zinc-500 text-xs uppercase tracking-wider">Impacto FX</p>
-          <p className={`text-2xl font-semibold tabular-nums ${pctColor(results.fxImpact)}`}>
-            {formatPct(results.fxImpact)}
-          </p>
+          {results.fxImpact !== null ? (
+            <p className={`text-2xl font-semibold tabular-nums ${pctColor(results.fxImpact)}`}>
+              {formatPct(results.fxImpact)}
+            </p>
+          ) : (
+            <p className="text-2xl font-semibold text-zinc-600">—</p>
+          )}
         </div>
       </div>
 
@@ -70,10 +78,12 @@ export default function ResultsPanel({ results }: Props) {
           label="Precio subyacente (compra → actual)"
           value={`$${results.buyPriceUSD.toFixed(2)} → $${results.currentPriceUSD.toFixed(2)}`}
         />
-        <DetailRow
-          label="CCL (compra → actual)"
-          value={`$${results.cclAtBuy.toFixed(0)} → $${results.cclCurrent.toFixed(0)}`}
-        />
+        {results.cclAtBuy !== null && (
+          <DetailRow
+            label="CCL (compra → actual)"
+            value={`$${results.cclAtBuy.toFixed(0)} → $${results.cclCurrent.toFixed(0)}`}
+          />
+        )}
       </div>
     </div>
   );
