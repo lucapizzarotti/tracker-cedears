@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Loader2, TrendingUp } from "lucide-react";
 import CalculatorForm, { type FormValues } from "@/components/calculator-form";
 import ResultsPanel, { type Results } from "@/components/results-panel";
 import { Separator } from "@/components/ui/separator";
@@ -41,15 +42,20 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      <div className="mx-auto max-w-xl px-4 py-12 sm:py-16">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
+      <div className="mx-auto w-full max-w-xl px-4 py-12 sm:py-16 flex-1">
         {/* Header */}
         <header className="mb-10">
-          <h1 className="text-xl font-semibold tracking-tight text-zinc-100">
-            CEDEAR Real Yield
-          </h1>
-          <p className="mt-1 text-sm text-zinc-500">
-            Calculá tu rendimiento real en USD, ARS y el impacto del tipo de cambio.
+          <div className="flex items-center gap-3 mb-3">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-zinc-700/60 bg-zinc-800/80">
+              <TrendingUp className="h-4 w-4 text-emerald-400" />
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-100">
+              CEDEAR Real Yield
+            </h1>
+          </div>
+          <p className="text-sm text-zinc-500 leading-relaxed pl-11">
+            Rendimiento real de tus CEDEARs en USD, ARS y el impacto del tipo de cambio.
           </p>
         </header>
 
@@ -66,14 +72,16 @@ export default function Home() {
               <h2 className="mb-5 text-xs font-semibold uppercase tracking-wider text-zinc-500">
                 Resultados
               </h2>
+
               {loading ? (
-                <div className="flex items-center justify-center py-10">
-                  <p className="text-sm text-zinc-500">Consultando APIs…</p>
+                <div className="flex items-center justify-center gap-2 py-10 text-sm text-zinc-500">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Consultando precios y CCL histórico…
                 </div>
               ) : error ? (
-                <p className="rounded-md bg-red-950/40 border border-red-900/50 px-4 py-3 text-sm text-red-400">
-                  {error}
-                </p>
+                <div className="rounded-lg bg-red-950/40 border border-red-900/40 px-4 py-3">
+                  <p className="text-sm text-red-400">{error}</p>
+                </div>
               ) : (
                 <ResultsPanel results={results} />
               )}
@@ -81,6 +89,19 @@ export default function Home() {
           </>
         )}
       </div>
+
+      {/* Footer */}
+      <footer className="py-8 text-center text-xs text-zinc-600">
+        Hecho por{" "}
+        <a
+          href="https://github.com/lucapizzarotti"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-zinc-500 hover:text-zinc-300 transition-colors"
+        >
+          Luca Pizzarotti
+        </a>
+      </footer>
     </div>
   );
 }

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { DM_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const dmSans = DM_Sans({
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -14,7 +14,21 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "CEDEAR Real Yield",
-  description: "Calculá el rendimiento real de tus CEDEARs en USD y ARS",
+  description:
+    "Calculá el rendimiento real de tus CEDEARs desglosado en USD, ARS e impacto del tipo de cambio.",
+  openGraph: {
+    title: "CEDEAR Real Yield",
+    description:
+      "Calculá el rendimiento real de tus CEDEARs desglosado en USD, ARS e impacto del tipo de cambio.",
+    type: "website",
+    locale: "es_AR",
+  },
+  twitter: {
+    card: "summary",
+    title: "CEDEAR Real Yield",
+    description:
+      "Calculá el rendimiento real de tus CEDEARs desglosado en USD, ARS e impacto del tipo de cambio.",
+  },
 };
 
 export default function RootLayout({
@@ -24,9 +38,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className="dark">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${dmSans.className} ${geistMono.variable} antialiased`}>
         {children}
       </body>
     </html>

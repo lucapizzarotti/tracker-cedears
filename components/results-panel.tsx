@@ -4,11 +4,11 @@ import { Separator } from "@/components/ui/separator";
 
 export type Results = {
   yieldUSD: number;
-  yieldARS: number | null;
-  fxImpact: number | null;
+  yieldARS: number;
+  fxImpact: number;
   buyPriceUSD: number;
   currentPriceUSD: number;
-  cclAtBuy: number | null;
+  cclAtBuy: number;
   cclCurrent: number;
 };
 
@@ -16,10 +16,29 @@ type Props = {
   results: Results | null;
 };
 
-function formatPct(value: number) {
-  const sign = value >= 0 ? "+" : "";
-  return `${sign}${(value * 100).toFixed(2)}%`;
-}
+const fmtPct = (n: number) =>
+  new Intl.NumberFormat("es-AR", {
+    style: "percent",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    signDisplay: "always",
+  })
+    .format(n)
+    .replace(/\s/, "");
+
+const fmtUSD = (n: number) =>
+  "USD " +
+  new Intl.NumberFormat("es-AR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(n);
+
+const fmtARS = (n: number) =>
+  "$ " +
+  new Intl.NumberFormat("es-AR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(n);
 
 function pctColor(value: number) {
   if (value > 0) return "text-emerald-400";
@@ -30,70 +49,81 @@ function pctColor(value: number) {
 export default function ResultsPanel({ results }: Props) {
   if (!results) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <p className="text-zinc-600 text-sm">
-          Completá el formulario para ver tu rendimiento real.
-        </p>
-      </div>
+      <p className="text-center text-zinc-600 text-sm py-10">
+        Completá el formulario para ver tu rendimiento real.
+      </p>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Main yields */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="space-y-1">
-          <p className="text-zinc-500 text-xs uppercase tracking-wider">Rendimiento USD</p>
-          <p className={`text-2xl font-semibold tabular-nums ${pctColor(results.yieldUSD)}`}>
-            {formatPct(results.yieldUSD)}
+      {/* KPI hero — Rendimiento USD */}
+      <div className="space-y-1">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-500">
+          Rendimiento en USD
+        </p>
+        <p
+          className={`text-[2.75rem] leading-none font-bold tabular-nums tracking-tight ${pctColor(results.yieldUSD)}`}
+        >
+          {fmtPct(results.yieldUSD)}
+        </p>
+      </div>
+
+      {/* KPIs secundarios */}
+      <div className="grid grid-cols-2 gap-x-6 gap-y-1">
+        <div className="space-y-0.5">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-600">
+            Rendimiento ARS
+          </p>
+          <p className={`text-2xl font-semibold tabular-nums leading-tight ${pctColor(results.yieldARS)}`}>
+            {fmtPct(results.yieldARS)}
           </p>
         </div>
-        <div className="space-y-1">
-          <p className="text-zinc-500 text-xs uppercase tracking-wider">Rendimiento ARS</p>
-          {results.yieldARS !== null ? (
-            <p className={`text-2xl font-semibold tabular-nums ${pctColor(results.yieldARS)}`}>
-              {formatPct(results.yieldARS)}
-            </p>
-          ) : (
-            <p className="text-2xl font-semibold text-zinc-600">—</p>
-          )}
-        </div>
-        <div className="space-y-1">
-          <p className="text-zinc-500 text-xs uppercase tracking-wider">Impacto FX</p>
-          {results.fxImpact !== null ? (
-            <p className={`text-2xl font-semibold tabular-nums ${pctColor(results.fxImpact)}`}>
-              {formatPct(results.fxImpact)}
-            </p>
-          ) : (
-            <p className="text-2xl font-semibold text-zinc-600">—</p>
-          )}
+        <div className="space-y-0.5">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-600">
+            Impacto FX
+          </p>
+          <p className={`text-2xl font-semibold tabular-nums leading-tight ${pctColor(results.fxImpact)}`}>
+            {fmtPct(results.fxImpact)}
+          </p>
         </div>
       </div>
 
       <Separator className="bg-zinc-800" />
 
-      {/* Detail rows */}
+      {/* Detalle */}
       <div className="space-y-3">
         <DetailRow
-          label="Precio subyacente (compra → actual)"
-          value={`$${results.buyPriceUSD.toFixed(2)} → $${results.currentPriceUSD.toFixed(2)}`}
+          label="Precio subyacente"
+          sub="compra → actual"
+          value={`${fmtUSD(results.buyPriceUSD)} → ${fmtUSD(results.currentPriceUSD)}`}
         />
-        {results.cclAtBuy !== null && (
-          <DetailRow
-            label="CCL (compra → actual)"
-            value={`$${results.cclAtBuy.toFixed(0)} → $${results.cclCurrent.toFixed(0)}`}
-          />
-        )}
+        <DetailRow
+          label="Dólar CCL"
+          sub="compra → actual"
+          value={`${fmtARS(results.cclAtBuy)} → ${fmtARS(results.cclCurrent)}`}
+        />
       </div>
     </div>
   );
 }
 
-function DetailRow({ label, value }: { label: string; value: string }) {
+function DetailRow({
+  label,
+  sub,
+  value,
+}: {
+  label: string;
+  sub?: string;
+  value: string;
+}) {
   return (
-    <div className="flex items-center justify-between">
-      <span className="text-zinc-500 text-sm">{label}</span>
-      <span className="text-zinc-200 text-sm font-mono">{value}</span>
+    <div className="flex items-center justify-between gap-4">
+      <div className="min-w-0">
+        <span className="text-zinc-400 text-sm">{label}</span>
+        {sub && <span className="ml-1.5 text-zinc-600 text-xs">{sub}</span>}
+      </div>
+      <span className="text-zinc-200 text-sm font-mono shrink-0">{value}</span>
     </div>
   );
 }
