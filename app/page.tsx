@@ -78,7 +78,7 @@ export default function Home() {
       </div>
 
       <footer className="py-6 text-center text-xs text-zinc-600">
-        Proyecto 🖊 por{" "}
+        Proyecto 🧪 por{" "}
         <a
           href="https://github.com/lucapizzarotti"
           target="_blank"
