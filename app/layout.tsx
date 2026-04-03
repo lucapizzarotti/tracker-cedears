@@ -13,11 +13,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CEDEAR Real Yield",
+  title: "Cedereal",
   description:
     "Calculá el rendimiento real de tus CEDEARs desglosado en USD, ARS e impacto del tipo de cambio.",
   openGraph: {
-    title: "CEDEAR Real Yield",
+    title: "Cedereal",
     description:
       "Calculá el rendimiento real de tus CEDEARs desglosado en USD, ARS e impacto del tipo de cambio.",
     type: "website",
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary",
-    title: "CEDEAR Real Yield",
+    title: "Cedereal",
     description:
       "Calculá el rendimiento real de tus CEDEARs desglosado en USD, ARS e impacto del tipo de cambio.",
   },

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { CEDEAR_MAP } from "@/lib/cedears";
 import { parseArgentineNumber } from "@/lib/parse-number";
+import { parseDateInput } from "@/lib/date-parser";
 
 const AV_KEY = process.env.ALPHA_VANTAGE_API_KEY;
 
@@ -95,10 +96,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Precio de compra inválido" }, { status: 400 });
     }
 
+    const purchaseDateISO = parseDateInput(purchaseDate);
+    if (!purchaseDateISO) {
+      return NextResponse.json({ error: "Fecha de compra inválida" }, { status: 400 });
+    }
+
     const [currentPriceUSD, cclCurrent, cclAtBuy] = await Promise.all([
       fetchCurrentPrice(ticker),
       fetchCurrentCCL(),
-      fetchHistoricalCCL(purchaseDate),
+      fetchHistoricalCCL(purchaseDateISO),
     ]);
 
     // Precio del subyacente al momento de compra:

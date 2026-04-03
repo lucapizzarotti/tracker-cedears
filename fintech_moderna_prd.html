@@ -1,0 +1,170 @@
+# FinTech Moderna: CEDEAR Real Yield
+
+## Product Overview
+
+**The Pitch:** A high-precision, visually striking financial calculator for Argentine investors to determine the true yield of their CEDEAR investments. It strips away spreadsheet clutter in favor of a focused, trading-terminal aesthetic.
+
+**For:** Retail investors and traders in Argentina who need to calculate real, adjusted returns on foreign assets without wrestling with complex formulas.
+
+**Device:** desktop
+
+**Design Direction:** Deep dark mode with pure blacks, high-contrast borders, and neon green accents. Technical, geometric, and brutally clean.
+
+**Inspired by:** Binance Pro interface, Vercel dashboard.
+
+---
+
+## Screens
+
+- **1. Initial Calculator:** Empty form state, clean inputs awaiting data
+- **2. Asset Search:** Active dropdown state for searching ticker symbols
+- **3. Filled Form:** Active inputs with focus glows and formatted data
+- **4. Yield Results:** Data visualization of the calculated return
+
+---
+
+## Key Flows
+
+**Calculate Real Yield:** User inputs trade details to see profitability
+
+1. User is on Initial Calculator -> sees empty input fields and a disabled CTA
+2. User clicks "Selector de CEDEAR" -> Asset Search opens, user types "AAPL"
+3. User fills remaining fields -> Inputs glow, numbers format automatically
+4. User clicks "Calcular rendimiento" -> Yield Results screen replaces the form with calculated metrics
+
+---
+
+<details>
+<summary>Design System</summary>
+
+## Color Palette
+
+- **Primary:** `#00FF66` - Main CTA, active input borders, positive yield
+- **Background:** `#000000` - Main page background
+- **Surface:** `#0A0A0A` - Form container, dropdown menus
+- **Text:** `#FFFFFF` - Primary headings, active input text
+- **Muted:** `#878787` - Labels, placeholders, footer
+- **Accent:** `#222222` - Inactive borders, dividers
+- **Negative:** `#FF3366` - Error states, negative yield
+
+## Typography
+
+- **Headings:** Inter, 600, 24px, -0.02em tracking
+- **Body:** Inter, 400, 14px
+- **Numbers/Data:** JetBrains Mono, 500, 16px
+- **Labels:** Inter, 500, 12px, uppercase, 0.05em tracking
+- **Buttons:** Inter, 600, 15px
+
+**Style notes:** Sharp 4px border radii. Deep pure black backgrounds with subtle `#222222` borders. Focus states use an outer glow (`box-shadow: 0 0 0 1px #00FF66`) instead of thick outlines. Monospace font strictly used for any numerical input or output.
+
+## Design Tokens
+
+```css
+:root {
+  --color-primary: #00FF66;
+  --color-background: #000000;
+  --color-surface: #0A0A0A;
+  --color-text: #FFFFFF;
+  --color-muted: #878787;
+  --color-border: #222222;
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius: 4px;
+}
+```
+
+</details>
+
+---
+
+<details>
+<summary>Screen Specifications</summary>
+
+### 1. Initial Calculator
+
+**Purpose:** Base state of the application for data entry
+
+**Layout:** Centered 480px wide container. Header top-left. Footer bottom-center.
+
+**Key Elements:**
+- **Header:** Logo (Neon green geometric shape) + "CEDEAR Real Yield" (`#FFFFFF`, 20px, 600)
+- **Input Group:** Stacked fields (CEDEAR, Cantidad, Fecha, Precio). `#0A0A0A` background, `#222222` border, 44px height.
+- **CTA Button:** 100% width, 48px height, `#00FF66` background, `#000000` text, "Calcular rendimiento"
+- **Footer:** "Hecho por Luca Pizzarotti", `#878787`, 12px, centered.
+
+**States:**
+- **Empty:** CTA button opacity 50%, unclickable.
+- **Loading:** N/A
+
+**Components:**
+- **Input Field:** 44px height, 4px radius, label outside top (12px, `#878787`).
+
+**Interactions:**
+- **Click Input:** Border changes to `#00FF66`, outer glow `0 0 8px rgba(0, 255, 102, 0.2)`.
+- **Hover Button:** None (disabled state).
+
+### 2. Asset Search
+
+**Purpose:** Allow user to quickly find and select a CEDEAR ticker
+
+**Layout:** Dropdown anchored to the "Selector de CEDEAR" input
+
+**Key Elements:**
+- **Search Input:** Focused state, blinking text cursor, `#00FF66` border.
+- **Dropdown List:** Absolute positioned, 100% width, `#0A0A0A` bg, `#222222` border, max-height 240px.
+- **List Item:** 40px height, flex row, Ticker (`JetBrains Mono`, `#FFFFFF`) + Company Name (`Inter`, `#878787`).
+
+**States:**
+- **Empty Search:** "No se encontraron CEDEARs" (`#878787`, center).
+
+**Interactions:**
+- **Hover List Item:** Background changes to `#1A1A1A`.
+- **Click List Item:** Fills input, closes dropdown, moves focus to "Cantidad".
+
+### 3. Filled Form
+
+**Purpose:** Review data before calculation
+
+**Layout:** Same as Initial Calculator, populated with data.
+
+**Key Elements:**
+- **Filled Inputs:** Text color `#FFFFFF`, Numbers use `JetBrains Mono`.
+- **Precio Input:** Displays "ARS" as a right-aligned suffix inside the input (`#878787`).
+- **Active CTA:** 100% opacity, crisp `#00FF66`.
+
+**Interactions:**
+- **Hover CTA:** Background brightens to `#33FF85`, adds subtle box-shadow `0 0 12px rgba(0, 255, 102, 0.3)`.
+- **Click CTA:** Button text changes to "Calculando..." with a 3-dot typing animation, transition to Screen 4.
+
+### 4. Yield Results
+
+**Purpose:** Display the final calculated performance metrics
+
+**Layout:** Replaces the form fields inside the 480px central container.
+
+**Key Elements:**
+- **Summary Card:** `#0A0A0A` surface, `#222222` border.
+- **Asset Header:** "AAPL - Apple Inc." (`#FFFFFF`, 18px).
+- **Big Number (Rendimiento Neto):** 48px, `JetBrains Mono`. `#00FF66` if positive, `#FF3366` if negative.
+- **Data Grid:** 2-column grid showing "Inversión Inicial", "Valor Actual", "Inflación Período", "Rendimiento Real".
+- **Reset Button:** Secondary button style. Transparent bg, `#222222` border, `#FFFFFF` text. "Nuevo cálculo".
+
+**Interactions:**
+- **Click Reset:** Clears data, returns to Screen 1.
+
+</details>
+
+---
+
+<details>
+<summary>Build Guide</summary>
+
+**Stack:** HTML + Tailwind CSS v3
+
+**Build Order:**
+1. **Design Tokens & Layout Setup:** Configure `tailwind.config.js` with pure blacks, `#00FF66` primary, and font families (Inter, JetBrains Mono). Setup the global dark background and centered flex layout.
+2. **Initial Calculator:** Build the form inputs, applying the precise 4px radius, `#222222` borders, and focus rings. Establishes the core UI components.
+3. **Asset Search:** Implement the dropdown positioning and hover states. Tests z-index and active states.
+4. **Yield Results:** Build the data grid and large typography typography outputs. Verifies monospace font rendering and positive/negative color scales.
+
+</details>

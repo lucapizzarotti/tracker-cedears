@@ -1,22 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, TrendingUp } from "lucide-react";
 import CalculatorForm, { type FormValues } from "@/components/calculator-form";
 import ResultsPanel, { type Results } from "@/components/results-panel";
-import { Separator } from "@/components/ui/separator";
 import type { CalculateResponse } from "@/app/api/calculate/route";
+import { CEDEAR_MAP } from "@/lib/cedears";
+import { parseArgentineNumber } from "@/lib/parse-number";
+
+type View = "form" | "results";
 
 export default function Home() {
+  const [view, setView] = useState<View>("form");
   const [results, setResults] = useState<Results | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [hasSubmitted, setHasSubmitted] = useState(false);
 
   async function handleSubmit(values: FormValues) {
     setLoading(true);
     setError(null);
-    setHasSubmitted(true);
 
     try {
       const res = await fetch("/api/calculate", {
@@ -29,77 +30,62 @@ export default function Home() {
 
       if ("error" in data) {
         setError(data.error);
-        setResults(null);
       } else {
-        setResults(data);
+        const cedear = CEDEAR_MAP[values.ticker];
+        const quantity = Number(values.quantity);
+        const purchasePriceARS = parseArgentineNumber(values.purchasePrice);
+
+        setResults({
+          ...data,
+          inversionInicialARS: quantity * purchasePriceARS,
+          valorActualARS: (quantity * data.currentPriceUSD * data.cclCurrent) / cedear.ratio,
+          ticker: values.ticker,
+          cedearName: cedear.name,
+        });
+        setView("results");
       }
     } catch {
       setError("No se pudo conectar con el servidor. Verificá tu conexión.");
-      setResults(null);
     } finally {
       setLoading(false);
     }
   }
 
+  function handleNuevoCalculo() {
+    setView("form");
+    setResults(null);
+    setError(null);
+  }
+
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
-      <div className="mx-auto w-full max-w-xl px-4 py-12 sm:py-16 flex-1">
-        {/* Header */}
-        <header className="mb-10">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-zinc-700/60 bg-zinc-800/80">
-              <TrendingUp className="h-4 w-4 text-emerald-400" />
-            </div>
-            <h1 className="text-2xl font-bold tracking-tight text-zinc-100">
-              CEDEAR Real Yield
-            </h1>
-          </div>
-          <p className="text-sm text-zinc-500 leading-relaxed pl-11">
-            Rendimiento real de tus CEDEARs en USD, ARS y el impacto del tipo de cambio.
-          </p>
-        </header>
+    <div className="min-h-screen bg-black text-zinc-100 flex flex-col">
+      <div className="mx-auto w-full max-w-lg px-4 py-12 sm:py-16 flex-1">
 
-        {/* Form card */}
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-6">
-          <CalculatorForm onSubmit={handleSubmit} loading={loading} />
-        </div>
-
-        {/* Results */}
-        {hasSubmitted && (
+        {view === "form" ? (
           <>
-            <Separator className="my-8 bg-zinc-800" />
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-6">
-              <h2 className="mb-5 text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                Resultados
-              </h2>
+            {/* Header */}
+            <header className="mb-10 flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-[#00E676] shrink-0" />
+              <h1 className="text-3xl font-bold tracking-tight text-white">Cedereal</h1>
+            </header>
 
-              {loading ? (
-                <div className="flex items-center justify-center gap-2 py-10 text-sm text-zinc-500">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Consultando precios y CCL histórico…
-                </div>
-              ) : error ? (
-                <div className="rounded-lg bg-red-950/40 border border-red-900/40 px-4 py-3">
-                  <p className="text-sm text-red-400">{error}</p>
-                </div>
-              ) : (
-                <ResultsPanel results={results} />
-              )}
-            </div>
+            <CalculatorForm onSubmit={handleSubmit} loading={loading} error={error} />
           </>
+        ) : (
+          results && <ResultsPanel results={results} onNuevoCalculo={handleNuevoCalculo} />
         )}
+
       </div>
 
-      {/* Footer */}
-      <footer className="py-8 text-center text-xs text-zinc-600">
-        Hecho por{" "}
+      <footer className="py-6 text-center text-xs text-zinc-600">
+        Proyecto 🖊 por{" "}
         <a
           href="https://github.com/lucapizzarotti"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-zinc-500 hover:text-zinc-300 transition-colors"
+          className="hover:text-zinc-400 transition-colors"
         >
-          Luca Pizzarotti
+          Luca
         </a>
       </footer>
     </div>
