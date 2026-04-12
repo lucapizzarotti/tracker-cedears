@@ -3,26 +3,22 @@ import { CEDEAR_MAP } from "@/lib/cedears";
 import { parseArgentineNumber } from "@/lib/parse-number";
 import { parseDateInput } from "@/lib/date-parser";
 
-const AV_KEY = process.env.ALPHA_VANTAGE_API_KEY;
+const FINNHUB_KEY = process.env.FINNHUB_API_KEY;
 
 async function fetchCurrentPrice(ticker: string): Promise<number> {
-  const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${AV_KEY}`;
-  const res = await fetch(url, { next: { revalidate: 300 } });
-  if (!res.ok) throw new Error("Error al consultar Alpha Vantage");
+  const url = `https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`;
+  const res = await fetch(url, { next: { revalidate: 3600 } });
+  if (!res.ok) throw new Error("Error al consultar Finnhub");
   const data = await res.json();
 
-  if (data["Note"] || data["Information"]) {
-    throw new Error("Límite de requests de Alpha Vantage alcanzado. Intentá en unos minutos.");
-  }
-
-  const price = parseFloat(data["Global Quote"]?.["05. price"]);
-  if (isNaN(price)) throw new Error(`No se encontró precio para ${ticker}`);
+  const price = data.c;
+  if (!price || isNaN(price) || price === 0) throw new Error(`No se encontró precio para ${ticker}`);
   return price;
 }
 
 async function fetchCurrentCCL(): Promise<number> {
   const res = await fetch("https://dolarapi.com/v1/dolares/contadoconliqui", {
-    next: { revalidate: 300 },
+    next: { revalidate: 3600 },
   });
   if (!res.ok) throw new Error("Error al consultar DolarApi.com");
   const data = await res.json();
