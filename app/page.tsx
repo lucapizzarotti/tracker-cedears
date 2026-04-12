@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { SquareRadical } from "lucide-react";
 import CalculatorForm, { type FormValues } from "@/components/calculator-form";
 import ResultsPanel, { type Results } from "@/components/results-panel";
 import type { CalculateResponse } from "@/app/api/calculate/route";
@@ -65,7 +66,7 @@ export default function Home() {
           <>
             {/* Header */}
             <header className="mb-10 flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-[#00E676] shrink-0" />
+              <SquareRadical className="h-8 w-8 shrink-0 text-[#00E676]" strokeWidth={2} />
               <h1 className="text-3xl font-bold tracking-tight text-white">Cedereal</h1>
             </header>
 
